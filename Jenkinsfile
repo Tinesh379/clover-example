@@ -1,9 +1,12 @@
 pipeline{
     agent any
     stages{
-        stage('Hello'){
+        stage('checkout'){
             steps{
-                echo 'hello this is first stage'
+                sh 'ls -altr'
+                script{
+                    println "This is the the first step in pipeline"
+                }
             }
         }
         stage('Test'){
@@ -22,6 +25,17 @@ pipeline{
                 failingTarget: [methodCoverage: 0, conditionalCoverage: 0, statementCoverage: 0]
             )
             }
+        }
+    }
+    post{
+        success{
+            publishHTML([allowMissing: false, 
+            alwaysLinkToLastBuild: false, 
+            keepAll: false, 
+            reportDir: 'target/site/clover', 
+            reportFiles: 'index.html', 
+            reportName: 'clover code coverage', 
+            reportTitles: ''])
         }
     }
 }
