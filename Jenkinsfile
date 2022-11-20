@@ -1,7 +1,7 @@
 pipeline{
     agent{
         kubernetes{
-            yamlFile 'agent.yml
+            yamlFile 'agent.yml'
             defaultContainer 'maven'
         }
     }
