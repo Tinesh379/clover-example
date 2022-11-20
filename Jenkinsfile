@@ -1,5 +1,10 @@
 pipeline{
-    agent{label 'linux'}
+    agent{
+        kubernetes{
+            yamlFile 'agent.yml
+            defaultContainer 'maven'
+        }
+    }
     stages{
         stage('Load Properties'){
             steps{
@@ -11,11 +16,14 @@ pipeline{
         }
         stage('Test'){
             steps{
+                container('maven'){
                 sh 'mvn clean clover:setup test clover:aggregate clover:clover'
+                }
             }
         }
         stage('Clover Reports'){
             steps{
+                container('maven'){
                  clover(cloverReportDir: 'target/site', cloverReportFileName: 'clover.xml',
                 // optional, default is: method=70, conditional=80, statement=80
                  healthyTarget: [methodCoverage: 70, conditionalCoverage: 80, statementCoverage: 80],
@@ -25,15 +33,18 @@ pipeline{
                 failingTarget: [methodCoverage: 0, conditionalCoverage: 0, statementCoverage: 0]
             )
             }
+            }
         }
         stage('Maven Build'){
             steps{
+                container('maven'){
                 echo "staring the maven build"
                 sh "mvn package -DskipTests"
                 script{
                     if(currentBuild.result == 'success'){
                       println " successfully packaged the application"
                     }
+                }
                 }
             }
         }
